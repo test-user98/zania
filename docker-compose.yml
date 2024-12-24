@@ -40,6 +40,8 @@ services:
   app:
     build: .
     container_name: ecommerce_app
+    ports:
+      - '8000:8000' 
     restart: always
     depends_on:
       db:
@@ -55,6 +57,8 @@ services:
   test_runner:
     build: .
     container_name: ecommerce_test_runner
+    ports:
+      - '8000:8000' 
     depends_on:
       - test_db
     environment:
