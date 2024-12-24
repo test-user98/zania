@@ -1,0 +1,75 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+  db:
+    image: postgres:latest
+    container_name: ecommerce_db
+    restart: always
+    environment:
+      POSTGRES_USER: ironman
+      POSTGRES_PASSWORD: ironman
+      POSTGRES_DB: ecommerce
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ironman -d ecommerce"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  test_db:
+    image: postgres:latest
+    container_name: ecommerce_test_db
+    restart: always
+    environment:
+      POSTGRES_USER: ironman
+      POSTGRES_PASSWORD: ironman
+      POSTGRES_DB: test_ecommerce
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  app:
+    build: .
+    container_name: ecommerce_app
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PYTHONPATH: /app
+      DATABASE_URL: postgresql://ironman:ironman@db/ecommerce
+    volumes:
+      - .:/app
+    networks:
+      - app-network
+
+  test_runner:
+    build: .
+    container_name: ecommerce_test_runner
+    depends_on:
+      - test_db
+    environment:
+      PYTHONPATH: /tests
+      TEST_DATABASE_URL: postgresql://ironman:ironman@test_db/test_ecommerce
+    volumes:
+      - .:/app
+    networks:
+      - app-network
+    command: ["pytest", "--disable-warnings"]
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  postgres_test_data:

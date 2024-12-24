@@ -5,7 +5,8 @@ from sqlalchemy.orm import sessionmaker
 from app.database import Base
 from app.api import app, get_db
 
-SQLALCHEMY_DATABASE_URL = "postgresql://ironman@localhost:5433/test_ecommerce"
+# SQLALCHEMY_DATABASE_URL = "postgresql://ironman@localhost:5433/test_ecommerce"
+SQLALCHEMY_DATABASE_URL = "postgresql://ironman:ironman@test_db:5432/test_ecommerce"
 
 @pytest.fixture(scope="session")
 def engine():
